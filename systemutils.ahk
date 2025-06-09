@@ -19,12 +19,15 @@ global MouseWheelDesktopsEnabled := true
 ; Visible names for desktops
 global DesktopNames := Map(
     0, "Scratch",
-    1, "Browse",
-    2, "Code",
-    3, "Engine",
+    1, "Browser",
+    2, "IDE",
+    3, "Main Tool",
     4, "Social",
     5, "Files"
 )
+
+; How long to display the desktop label in miliseconds (1000ms=1s)
+global DesktopLabelDuration := 250
 
 ; =============================================
 ; VirtualDesktopAccessor.dll
@@ -58,6 +61,9 @@ RemoveDesktopProc := DllCall("GetProcAddress", "Ptr", hVirtualDesktopAccessor, "
 ;} else {
 ;    MsgBox("Failed to load VirtualDesktopAccessor.dll")
 ;}
+
+; Configure the initial setup
+EnsureDesktopCountMatchesMap()
 
 ; =============================================
 ; Pause key
@@ -96,10 +102,40 @@ WheelRight:: {
 
 ShowDesktopLabel(index) {
     global DesktopNames
-    label := DesktopNames.Has(index) ? DesktopNames[index] : "Desktop " index + 1
+    global DesktopLabelDuration
 
-    ToolTip(label, A_ScreenWidth // 2 - 40, A_ScreenHeight // 2 - 20)
-    SetTimer(() => ToolTip(), -1000)  ; Hide after 1 second
+    static overlaygui := 0, textControl := 0
+
+    if !IsObject(overlaygui) {
+        overlaygui := Gui("+AlwaysOnTop -Caption +ToolWindow +E0x20")
+        overlaygui.BackColor := "000000"
+        overlaygui.SetFont("s36 Bold", "Segoe UI")
+        textControl := overlaygui.Add("Text", "w600 Center cWhite BackgroundTrans")
+    }
+
+    label := (index + 1) ": " (DesktopNames.Has(index) ? DesktopNames[index] : "Desktop")
+    textControl.Value := label
+    overlaygui.Show("AutoSize Center")
+
+    ; Cancel existing timer and start new one
+    SetTimer(() => overlaygui.Hide(), 0)
+    SetTimer(() => overlaygui.Hide(), -DesktopLabelDuration)
+}
+
+EnsureDesktopCountMatchesMap() {
+    global DesktopNames, GetDesktopCountProc, CreateDesktopProc
+
+    targetCount := DesktopNames.Count
+    currentCount := DllCall(GetDesktopCountProc, "Int")
+
+    ; Create new desktops if needed
+    while (currentCount < targetCount) {
+        DllCall(CreateDesktopProc)
+        currentCount++
+    }
+
+    ; NOTE: Safely removing desktops is more complicated and may disrupt the current session.
+    ; Safer to just ensure enough exist, not reduce count.
 }
 
 GetDesktopCount() {
