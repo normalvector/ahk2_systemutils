@@ -1,5 +1,6 @@
 #Requires AutoHotkey v2.0
 #SingleInstance Force  ; Ensures only one instance of the script runs
+#InputLevel 1 ; High-priority
 
 ; =============================================
 ; Settings
@@ -37,7 +38,11 @@ global DesktopLabelDuration := 250
 ; Bind the DLL
 SetWorkingDir(A_ScriptDir)
 VDA_Path := A_ScriptDir . "\VirtualDesktopAccessor.dll"
-hVirtualDesktopAccessor := DllCall("LoadLibrary", "Str", VDA_PATH, "Ptr")
+hVirtualDesktopAccessor := DllCall("LoadLibrary", "Str", VDA_Path, "Ptr")
+if !hVirtualDesktopAccessor {
+    MsgBox("Failed to load VirtualDesktopAccessor.dll")
+    ExitApp
+}
 
 ; Bind the functions
 GetDesktopCountProc := DllCall("GetProcAddress", "Ptr", hVirtualDesktopAccessor, "AStr", "GetDesktopCount", "Ptr")
@@ -84,14 +89,14 @@ EnsureDesktopCountMatchesMap()
 ; =============================================
 
 ; Map the wheel left input to go to previous desktop
-WheelLeft::{
+~WheelLeft::{
     if (SystemUtilsEnabled && MouseWheelDesktopsEnabled && hVirtualDesktopAccessor) {
         GoToPrevDesktop()
     }
 }
 
 ; Map the wheel right input to go to the next desktop
-WheelRight:: {
+~WheelRight:: {
     if (SystemUtilsEnabled && MouseWheelDesktopsEnabled && hVirtualDesktopAccessor) {
         GoToNextDesktop()
     }
