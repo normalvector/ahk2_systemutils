@@ -16,6 +16,16 @@ global PauseKeyEnabled := true
 ; Do we want to use the mouse wheel left/right to change desktops?
 global MouseWheelDesktopsEnabled := true
 
+; Visible names for desktops
+global DesktopNames := Map(
+    0, "Scratch",
+    1, "Browse",
+    2, "Code",
+    3, "Engine",
+    4, "Social",
+    5, "Files"
+)
+
 ; =============================================
 ; VirtualDesktopAccessor.dll
 ; Configure all of the bindings to the DLL so we're able to swap desktops
@@ -81,8 +91,16 @@ WheelRight:: {
     }
 }
 
-!1:: GoToPrevDesktop()  ; Alt+1 for previous desktop
-!2:: GoToNextDesktop()  ; Alt+2 for next desktop
+;!1:: GoToPrevDesktop()  ; Alt+1 for previous desktop
+;!2:: GoToNextDesktop()  ; Alt+2 for next desktop
+
+ShowDesktopLabel(index) {
+    global DesktopNames
+    label := DesktopNames.Has(index) ? DesktopNames[index] : "Desktop " index + 1
+
+    ToolTip(label, A_ScreenWidth // 2 - 40, A_ScreenHeight // 2 - 20)
+    SetTimer(() => ToolTip(), -1000)  ; Hide after 1 second
+}
 
 GetDesktopCount() {
     global GetDesktopCountProc
@@ -104,6 +122,7 @@ GoToPrevDesktop() {
     ; Change desktop if we're not already at the first one
     if (current > 0) {
         GoToDesktopNumber(current - 1)
+        ShowDesktopLabel(current - 1)
     }
     return
 }
@@ -116,6 +135,7 @@ GoToNextDesktop() {
     ; Change desktop if we're not already at the last one
     if (current < last_desktop) {
         GoToDesktopNumber(current + 1)
+        ShowDesktopLabel(current + 1)
     }
     return
 }
