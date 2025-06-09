@@ -40,14 +40,14 @@ CreateDesktopProc := DllCall("GetProcAddress", "Ptr", hVirtualDesktopAccessor, "
 RemoveDesktopProc := DllCall("GetProcAddress", "Ptr", hVirtualDesktopAccessor, "AStr", "RemoveDesktop", "Ptr")
 
 ; Add after loading the DLL
-if (hVirtualDesktopAccessor) {
-    MsgBox("VirtualDesktopAccessor.dll loaded successfully")
-    desktop_count := DllCall(GetDesktopCountProc, "Int")
-    current_desktop := DllCall(GetCurrentDesktopNumberProc, "Int")
-    MsgBox("Desktop count: " desktop_count "`nCurrent desktop: " current_desktop)
-} else {
-    MsgBox("Failed to load VirtualDesktopAccessor.dll")
-}
+;if (hVirtualDesktopAccessor) {
+;    MsgBox("VirtualDesktopAccessor.dll loaded successfully")
+;    desktop_count := DllCall(GetDesktopCountProc, "Int")
+;    current_desktop := DllCall(GetCurrentDesktopNumberProc, "Int")
+;    MsgBox("Desktop count: " desktop_count "`nCurrent desktop: " current_desktop)
+;} else {
+;    MsgBox("Failed to load VirtualDesktopAccessor.dll")
+;}
 
 ; =============================================
 ; Pause key
